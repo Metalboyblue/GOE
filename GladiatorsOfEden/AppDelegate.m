@@ -9,11 +9,17 @@
 #import "cocos2d.h"
 
 #import "AppDelegate.h"
-#import "HelloWorldLayer.h"
+#import "RegionMapScene.h"
+#import "GameManager.h"
+
 
 @implementation AppController
 
 @synthesize window=window_, navController=navController_, director=director_;
+@synthesize managedObjectContext = __managedObjectContext;
+@synthesize managedObjectModel = __managedObjectModel;
+@synthesize persistentStoreCoordinator = __persistentStoreCoordinator;
+
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -24,7 +30,7 @@
 	// Create an CCGLView with a RGB565 color buffer, and a depth buffer of 0-bits
 	CCGLView *glView = [CCGLView viewWithFrame:[window_ bounds]
 								   pixelFormat:kEAGLColorFormatRGB565	//kEAGLColorFormatRGBA8
-								   depthFormat:0	//GL_DEPTH_COMPONENT24_OES
+								   depthFormat:GL_DEPTH_COMPONENT24_OES
 							preserveBackbuffer:NO
 									sharegroup:nil
 								 multiSampling:NO
@@ -37,6 +43,8 @@
 	// Display FSP and SPF
 	[director_ setDisplayStats:YES];
 
+    [glView setMultipleTouchEnabled:YES];
+    
 	// set FPS at 60
 	[director_ setAnimationInterval:1.0/60];
 
@@ -80,8 +88,22 @@
 	[CCTexture2D PVRImagesHavePremultipliedAlpha:YES];
 
 	// and add the scene to the stack. The director will run it when it automatically when the view is displayed.
-	[director_ pushScene: [HelloWorldLayer scene]]; 
+	//[director_ pushScene: [WorldMapLayer scene]]; 
+    
+    NSURL *ubiq = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil];
+    if (ubiq) {
+        NSLog(@"iCloud Access At %@", ubiq);
+    }else {
+        NSLog(@"No iCloud Access");
+    }
+    [[GameManager sharedGameManager] setupAudioEngine];
+    //Temporarily set map to test map
+    [[GameManager sharedGameManager] setRegionMapToPresent:kTestRegion];
+    
+    [[GameManager sharedGameManager] runSceneWithID:kRegionMapScene];
 
+    
+    
 	return YES;
 }
 
@@ -143,4 +165,175 @@
 
 	[super dealloc];
 }
+
+- (NSManagedObjectModel *)managedObjectModel
+{
+    if (__managedObjectModel != nil)
+    {
+        return __managedObjectModel;
+    }
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"GOEModel" withExtension:@"momd"];
+    __managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+    return __managedObjectModel;
+    
+}
+
+- (NSPersistentStoreCoordinator *)persistentStoreCoordinator {
+	if (!TARGET_IPHONE_SIMULATOR) {
+        if (__persistentStoreCoordinator != nil) {
+            return __persistentStoreCoordinator;
+        }
+        
+        __persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] 
+                                        initWithManagedObjectModel: [self managedObjectModel]];
+        
+        NSPersistentStoreCoordinator* psc = __persistentStoreCoordinator;
+        
+        
+        NSString *storePath = [[self applicationDocumentsDirectory] stringByAppendingPathComponent:@"GladiatorsOfEden.sqlite"];
+        
+        // done asynchronously since it may take a while 
+        // to download preexisting iCloud content 
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
+            
+            
+            // building the path to store transaction logs
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            NSURL *transactionLogsURL = [fileManager 
+                                         URLForUbiquityContainerIdentifier:nil];
+            NSString* coreDataCloudContent = [[transactionLogsURL path] 
+                                              stringByAppendingPathComponent:@"goe_data"];
+            transactionLogsURL = [NSURL fileURLWithPath:coreDataCloudContent];
+            
+            //  Building the options array for the coordinator
+            NSDictionary* options = [NSDictionary 		
+                                     dictionaryWithObjectsAndKeys:
+                                     @"com.metalboyblue.coredata.notes", 
+                                     NSPersistentStoreUbiquitousContentNameKey, 
+                                     transactionLogsURL,
+                                     NSPersistentStoreUbiquitousContentURLKey, 
+                                     [NSNumber numberWithBool:YES], 
+                                     NSMigratePersistentStoresAutomaticallyOption, 
+                                     nil];
+            
+            
+            NSError *error = nil;
+            
+            [psc lock];
+            
+            if (![psc addPersistentStoreWithType:NSSQLiteStoreType 
+                                   configuration:nil 
+                                             URL:storeUrl 
+                                         options:options 
+                                           error:&error]) {
+                
+                NSLog(@"Core data error %@, %@", error, [error userInfo]);
+                abort();
+            }
+            
+            [psc unlock];
+            
+            // post a notification to tell the main thread 
+            // to refresh the user interface
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                NSLog(@"persistent store added correctly");
+                [[NSNotificationCenter defaultCenter] 
+                 postNotificationName:@"com.metalboyblue.refetchNotes" 
+                 object:self 
+                 userInfo:nil];
+            });
+        });
+        
+        return __persistentStoreCoordinator;
+    }
+    else {
+        if (__persistentStoreCoordinator != nil)
+        {
+            return __persistentStoreCoordinator;
+        }
+        
+        NSString *storePath = [[self applicationDocumentsDirectory] stringByAppendingPathComponent:@"GladiatorsOfEden.sqlite"];       
+        NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
+        
+        NSError *error = nil;
+        __persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
+        NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 [NSNumber numberWithBool:YES],NSMigratePersistentStoresAutomaticallyOption,
+                                 [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, nil];
+        
+        if (![__persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:options error:&error])
+        {
+            NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+            abort();
+        }    
+        
+        return __persistentStoreCoordinator;
+
+    }
+}
+
+
+- (NSManagedObjectContext *)managedObjectContext
+{   
+    if (__managedObjectContext != nil) {
+        return __managedObjectContext;
+    }	
+    NSPersistentStoreCoordinator *coordinator = 
+    [self persistentStoreCoordinator];
+    
+    if (coordinator != nil) {        
+        // choose a concurrency type for the context
+        NSManagedObjectContext* moc = 
+        [[NSManagedObjectContext alloc] 
+         initWithConcurrencyType:NSMainQueueConcurrencyType];
+        
+        [moc performBlockAndWait:^{
+            // configure context properties
+            [moc setPersistentStoreCoordinator: coordinator];
+            [[NSNotificationCenter defaultCenter] 
+             addObserver:self 
+             selector:@selector(mergeChangesFrom_iCloud:) 
+             name:NSPersistentStoreDidImportUbiquitousContentChangesNotification 
+             object:coordinator];
+        }];
+        __managedObjectContext = moc;
+    }    
+    return __managedObjectContext;
+}
+
+
+- (void)saveContext
+{
+    NSError *error = nil;
+    
+    if ([self.managedObjectContext hasChanges] && 
+        ![self.managedObjectContext save:&error])
+    {
+        NSLog(@"Core Data error %@, %@", error, [error userInfo]);
+        abort();
+    } 
+}
+
+- (void)mergeChangesFrom_iCloud:(NSNotification *)notification {
+    NSManagedObjectContext* moc = [self managedObjectContext];    
+    [moc performBlock:^{
+        [self mergeiCloudChanges:notification 
+                      forContext:moc];
+    }];
+}
+
+- (void)mergeiCloudChanges:(NSNotification*)note 
+                forContext:(NSManagedObjectContext*)moc {    
+    [moc mergeChangesFromContextDidSaveNotification:note];     
+    //Refresh view with no fetch controller if any    
+}
+
+- (NSString *)applicationDocumentsDirectory {
+	return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+}
+
+
 @end

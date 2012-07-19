@@ -128,27 +128,24 @@ default gl blend src function. Compatible with premultiplied alpha images.
 #ifdef __CC_PLATFORM_IOS
 
 #define CC_DIRECTOR_INIT()																		\
-do	{																							\
-	window_ = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];					\
-	director_ = (CCDirectorIOS*)[CCDirector sharedDirector];									\
-	[director_ setDisplayStats:NO];																\
-	[director_ setAnimationInterval:1.0/60];													\
-	CCGLView *__glView = [CCGLView viewWithFrame:[window_ bounds]								\
-									pixelFormat:kEAGLColorFormatRGB565							\
-									depthFormat:0 /* GL_DEPTH_COMPONENT24_OES */				\
-							 preserveBackbuffer:NO												\
-									 sharegroup:nil												\
-								  multiSampling:NO												\
-								numberOfSamples:0												\
-													];											\
-	[director_ setView:__glView];																\
-	[director_ setDelegate:self];																\
-	director_.wantsFullScreenLayout = YES;														\
-	if( ! [director_ enableRetinaDisplay:YES] )													\
-		CCLOG(@"Retina Display Not supported");													\
-	navController_ = [[UINavigationController alloc] initWithRootViewController:director_];		\
-	navController_.navigationBarHidden = YES;													\
-	[window_ addSubview:navController_.view];													\
+    do	{																							\
+    window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];					\
+    if( ! [CCDirector setDirectorType:kCCDirectorTypeDisplayLink] )								\
+    [CCDirector setDirectorType:kCCDirectorTypeNSTimer];									\
+    CCDirector *__director = [CCDirector sharedDirector];										\
+    [__director setDeviceOrientation:kCCDeviceOrientationPortrait];								\
+    [__director setDisplayFPS:NO];																\
+    [__director setAnimationInterval:1.0/60];													\
+    EAGLView *__glView = [EAGLView viewWithFrame:[window bounds]								\
+    pixelFormat:kEAGLColorFormatRGB565							\
+    depthFormat:0 /* GL_DEPTH_COMPONENT24_OES */				\
+    preserveBackbuffer:NO												\
+    sharegroup:nil												\
+    multiSampling:NO												\
+    numberOfSamples:0												\
+    ];											\
+    [__director setOpenGLView:__glView];														\
+    [window addSubview:__glView];																\
 	[window_ makeKeyAndVisible];																\
 } while(0)
 

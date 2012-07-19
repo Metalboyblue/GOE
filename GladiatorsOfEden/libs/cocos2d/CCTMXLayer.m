@@ -292,10 +292,12 @@ int compareInts (const void * a, const void * b);
 	return tile;
 }
 
+
 -(uint32_t) tileGIDAt:(CGPoint)pos
 {
 	return [self tileGIDAt:pos withFlags:NULL];
 }
+
 
 -(uint32_t) tileGIDAt:(CGPoint)pos withFlags:(ccTMXTileFlags*)flags
 {

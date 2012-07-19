@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1171" systemVersion="11E53" minimumToolsVersion="Xcode 4.1" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="RegionMap" syncable="YES">
+        <attribute name="regionName" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="ThePrince" representedClassName="ThePrince" syncable="YES">
+        <attribute name="experiencePoints" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="level" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+    </entity>
+    <entity name="Tile" syncable="YES">
+        <attribute name="isBeingAltered" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isBlocked" optional="YES" attributeType="Integer 32" syncable="YES"/>
+        <attribute name="tileGID" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="timeAlterationBegan" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="worldObjectType" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="RegionMap" positionX="-234" positionY="207" width="128" height="60"/>
+        <element name="ThePrince" positionX="160" positionY="192" width="128" height="75"/>
+        <element name="Tile" positionX="-27" positionY="216" width="128" height="120"/>
+    </elements>
+</model>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="isometric" width="70" height="70" tilewidth="64" tileheight="32">
+ <tileset firstgid="1" name="TheNewTiles" tilewidth="64" tileheight="64">
+  <image source="isometric_grass_and_water.png" width="256" height="384"/>
+ </tileset>
+ <tileset firstgid="25" name="BigTileSet" tilewidth="54" tileheight="49">
+  <properties>
+   <property name="AllTiles" value="Something Here"/>
+  </properties>
+  <image source="BigTileSet.png" width="756" height="735"/>
+  <tile id="3">
+   <properties>
+    <property name="AssetType" value="Water"/>
+   </properties>
+  </tile>
+  <tile id="54">
+   <properties>
+    <property name="AssetType" value="Tree"/>
+   </properties>
+  </tile>
+  <tile id="185">
+   <properties>
+    <property name="AssetType" value="Castle"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Ground" width="70" height="70">
+  <properties>
+   <property name="cc_vertexz" value="-1000"/>
+  </properties>
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3UawuCMBiA0VF0gZIgiv7/P+1Cga0lBZmv7ggPwvyw7bB5SimdJEmSpMqbZx3u4/vCt8j15TLj8lSTdeRy6/hmvHaXXRaX8n93rHHhwoULFy4R4sKFCxcuXCLEhQuXablEco7uMpRNBJeId5NLXJdod4hLfJfSWoYyiebSVeLy4tF+HuOLSl1S6527NK35lpW4tPdfeq7j28K8v/aJ5tJ1h1LqXnstLt+u/5dnZuwum57mH7tLX2dmCi75PriU98KFyyetL624/OXsceHChQsXLlzixYXLkC6SJEnSGDsDrRPEhZBMAAA=
+  </data>
+ </layer>
+ <objectgroup name="Objects" width="70" height="70" visible="0">
+  <object x="1248" y="1312"/>
+  <object name="SpawnPoint" x="1216" y="1312" width="32" height="32"/>
+ </objectgroup>
+ <layer name="MapItemsLayer" width="70" height="70">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3XUQqDMBAFwBykd8p5es2eSIRCqSaaQKB0dwaC5Ef08TZiKQAAAAAAAADxPH/9APw9HYqhLrxXpE6szCWSWnSGOas7E0U9XPnOQi4fZmje42Zl0DpjWlm83itLLrvjPMnlnMm+zzxHzt2+kVyyZjf63vrVlj2TkV5kzaj333S3z+bq/WXTn7Hs2TDPd/yafAAAAADIZAMz9LlIkEwAAA==
+  </data>
+ </layer>
+</map>
