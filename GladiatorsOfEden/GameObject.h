@@ -2,7 +2,7 @@
 //  GameObject.h
 //  GladiatorsOfEden
 //
-//  Created by Travis Baker on 7/3/12.
+//  Created by Travis Baker on 7/3/12.tt
 //  Copyright 2012 MetalBoyBlue. All rights reserved.
 //
 
