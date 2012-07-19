@@ -3,8 +3,8 @@
 //  GladiatorsOfEden
 //
 //  Created by Travis Baker on 7/3/12.
-//  Copyright 2012 MetalBoyBlue. All rights reserved.
-//
+//  Copyright 2012 MetalBoyBlue. All rights reserved. yeah.
+// 
 
 #import "GameObject.h"
 
